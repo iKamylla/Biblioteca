@@ -1,397 +1,347 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include <Windows.h>
-#include <ctype.h>
 
-// struct usuarios
-typedef struct{
-    char nome[20];
-    int emprestimo;
-} usuario;
+#define MAX_USUARIOS 100
+#define MAX_LIVROS 100
+#define MAX_EMPRESTIMOS 100
 
-// struct livros
-typedef struct{
-    char isbn[20];
-    char titulo[50];
-    char autor[20];
-    int disponivel;
-} livro;
+typedef struct {
+    int ISBN;
+    char nome[100];
+    char autor[100];
+    float valor;
+} Livro;
 
-// struct data
-typedef struct{
-    int dia;
-    int mes;
-    int ano;
-} data;
+typedef struct {
+    char cpf[12];
+    char nome[100];
+    int idade;
+} Usuario;
 
-// struct emprestimo
-typedef struct{
-    char isbn[20];
-    char nome[20];
-    data emprestimo;
-    data prevista;
-    data devolucao;
-} emprestimo;
+typedef struct {
+    int ISBNs[10]; // Maximo de 10 livros por emprestimo
+    time_t dataEmprestimo;
+    time_t dataDevolucao;
+    float multaPorDia;
+} Emprestimo;
 
-// struct aux
-typedef struct{
-    data dte;
-    data dtp;
-} aux;
+Livro livros[MAX_LIVROS];
+Usuario usuarios[MAX_USUARIOS];
+Emprestimo emprestimos[MAX_EMPRESTIMOS];
 
-void cadastroUsuario();
-void cadastroLivro();
-void emprestimos();
-void devolucao();
-void consultaUsuario();
-void cunsultaLivro();
-void lerArquivo();
-data dataAtual();
+int numLivros = 0, numUsuarios = 0, numEmprestimos = 0;
+float taxaMulta = 0.10; // 10% inicial
 
-// main
-int main(){
+void cadastrarLivro() {
+    system("cls");
+    if (numLivros >= MAX_LIVROS) {
+        printf("\n\tLimite de livros atingido!\n");
+        return;
+    }
+    printf("\n\tDigite o ISBN do livro: ");
+    scanf("%d", &livros[numLivros].ISBN);
+    printf("\n\tDigite o nome do livro: ");
+    scanf(" %[^\n]", livros[numLivros].nome);
+    printf("\n\tDigite o autor do livro: ");
+    scanf(" %[^\n]", livros[numLivros].autor);
+    printf("\n\tDigite o valor do livro: ");
+    scanf("%f", &livros[numLivros].valor);
+    numLivros++;
+    printf("\n\tLivro cadastrado com sucesso!\n");
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void visualizarLivros() {
+    system("cls");
+    if (numLivros == 0) {
+        printf("\n\tNenhum livro cadastrado!\n");
+        return;
+    }
+    printf("\n\tLivros cadastrados:\n");
+    for (int i = 0; i < numLivros; i++) {
+        printf("\n\t%d. ISBN: %d, Nome: %s, Autor: %s, Valor: %.2f\n", i + 1, livros[i].ISBN, livros[i].nome, livros[i].autor, livros[i].valor);
+    }
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void editarLivro() {
+    system("cls");
+    int isbn, found = 0;
+    printf("\n\tDigite o ISBN do livro que deseja editar: ");
+    scanf("%d", &isbn);
+    for (int i = 0; i < numLivros; i++) {
+        if (livros[i].ISBN == isbn) {
+            printf("\n\tEditando livro %s:\n", livros[i].nome);
+            printf("\n\tNovo ISBN (anterior %d): ", livros[i].ISBN);
+            scanf("%d", &livros[i].ISBN);
+            printf("\n\tNovo nome (anterior %s): ", livros[i].nome);
+            scanf(" %[^\n]", livros[i].nome);
+            printf("\n\tNovo autor (anterior %s): ", livros[i].autor);
+            scanf(" %[^\n]", livros[i].autor);
+            printf("\n\tNovo valor (anterior %.2f): ", livros[i].valor);
+            scanf("%f", &livros[i].valor);
+            found = 1;
+            printf("\n\tLivro editado com sucesso!\n");
+            break;
+        }
+    }
+    if (!found) {
+        printf("\n\tISBN nao encontrado!\n");
+    }
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void deletarLivro() {
+    system("cls");
+    int isbn, found = 0;
+    printf("\n\tDigite o ISBN do livro que deseja deletar: ");
+    scanf("%d", &isbn);
+    for (int i = 0; i < numLivros; i++) {
+        if (livros[i].ISBN == isbn) {
+            for (int j = i; j < numLivros - 1; j++) {
+                livros[j] = livros[j + 1];
+            }
+            numLivros--;
+            found = 1;
+            printf("\n\tLivro deletado com sucesso!\n");
+            break;
+        }
+    }
+    if (!found) {
+        printf("\n\tISBN nao encontrado!\n");
+    }
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void cadastrarUsuario() {
+    system("cls");
+    if (numUsuarios >= MAX_USUARIOS) {
+        printf("\n\tLimite de usuarios atingido!\n");
+        return;
+    }
+    printf("\n\tDigite o CPF do usuario (11 caracteres): ");
+    scanf("%s", usuarios[numUsuarios].cpf);
+    printf("\n\tDigite o nome do usuario: ");
+    scanf(" %[^\n]", usuarios[numUsuarios].nome);
+    printf("\n\tDigite a idade do usuario: ");
+    scanf("%d", &usuarios[numUsuarios].idade);
+    numUsuarios++;
+    printf("\n\tUsuario cadastrado com sucesso!\n");
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void visualizarUsuarios() {
+    system("cls");
+    if (numUsuarios == 0) {
+        printf("\n\tNenhum usuario cadastrado!\n");
+        return;
+    }
+    printf("\n\tUsuarios cadastrados:\n");
+    for (int i = 0; i < numUsuarios; i++) {
+        printf("%d. CPF: %s, Nome: %s, Idade: %d\n", i + 1, usuarios[i].cpf, usuarios[i].nome, usuarios[i].idade);
+    }
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void editarUsuario() {
+    system("cls");
+    char cpf[12];
+    int found = 0;
+    printf("\n\tDigite o CPF do usuario que deseja editar: ");
+    scanf("%s", cpf);
+    for (int i = 0; i < numUsuarios; i++) {
+        if (strcmp(usuarios[i].cpf, cpf) == 0) {
+            printf("\n\tEditando usuario %s:\n", usuarios[i].nome);
+            printf("\n\tNovo CPF (anterior %s): ", usuarios[i].cpf);
+            scanf("%s", usuarios[i].cpf);
+            printf("\n\tNovo nome (anterior %s): ", usuarios[i].nome);
+            scanf(" %[^\n]", usuarios[i].nome);
+            printf("\n\tNova idade (anterior %d): ", usuarios[i].idade);
+            scanf("%d", &usuarios[i].idade);
+            found = 1;
+            printf("\n\tUsuario editado com sucesso!\n");
+            break;
+        }
+    }
+    if (!found) {
+        printf("\n\tCPF nao encontrado!\n");
+    }
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void deletarUsuario() {
+    system("cls");
+    char cpf[12];
+    int found = 0;
+    printf("\n\tDigite o CPF do usuario que deseja deletar: ");
+    scanf("%s", cpf);
+    for (int i = 0; i < numUsuarios; i++) {
+        if (strcmp(usuarios[i].cpf, cpf) == 0) {
+            for (int j = i; j < numUsuarios - 1; j++) {
+                usuarios[j] = usuarios[j + 1];
+            }
+            numUsuarios--;
+            found = 1;
+            printf("\n\tUsuario deletado com sucesso!\n");
+            break;
+        }
+    }
+    if (!found) {
+        printf("\n\tCPF nao encontrado!\n");
+    }
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void visualizarEmprestimos() {
+    system("cls");
+    if (numEmprestimos == 0) {
+        printf("\n\tNenhum emprestimo cadastrado!\n");
+        return;
+    }
+    printf("\n\tEmprestimos cadastrados:\n");
+    char buf[20];
+    for (int i = 0; i < numEmprestimos; i++) {
+        printf("\n\tEmprestimo %d:\n", i + 1);
+        printf("\n\tLivros emprestados: ");
+        for (int j = 0; j < 10 && emprestimos[i].ISBNs[j] != 0; j++) {
+            printf("%d ", emprestimos[i].ISBNs[j]);
+        }
+        printf("\n");
+        strftime(buf, 20, "%Y-%m-%d %H:%M:%S", localtime(&emprestimos[i].dataEmprestimo));
+        printf("\tData do emprestimo: %s\n", buf);
+        strftime(buf, 20, "%Y-%m-%d %H:%M:%S", localtime(&emprestimos[i].dataDevolucao));
+        printf("\tData de devolucao: %s\n", buf);
+        printf("\tMulta por dia: %.2f\n", emprestimos[i].multaPorDia);
+    }
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void cadastrarEmprestimo() {
+    system("cls");
+    if (numEmprestimos >= MAX_EMPRESTIMOS) {
+        printf("\n\tLimite de emprestimos atingido!\n");
+        return;
+    }
+    printf("\n\tDigite o numero de livros do emprestimo: ");
+    int numLivrosEmprestimo;
+    scanf("%d", &numLivrosEmprestimo);
+    for (int i = 0; i < numLivrosEmprestimo; i++) {
+        printf("\n\tDigite o ISBN do livro %d: ", i + 1);
+        scanf("%d", &emprestimos[numEmprestimos].ISBNs[i]);
+    }
+    emprestimos[numEmprestimos].dataEmprestimo = time(NULL);
+    printf("\n\tDigite o numero de dias de emprestimo: ");
+    int diasEmprestimo;
+    scanf("%d", &diasEmprestimo);
+    emprestimos[numEmprestimos].dataDevolucao = emprestimos[numEmprestimos].dataEmprestimo + (diasEmprestimo * 86400);
+
+    // Calculando a multa por dia
+    emprestimos[numEmprestimos].multaPorDia = 0;
+    for (int i = 0; i < numLivrosEmprestimo; i++) {
+        for (int j = 0; j < numLivros; j++) {
+            if (emprestimos[numEmprestimos].ISBNs[i] == livros[j].ISBN) {
+                emprestimos[numEmprestimos].multaPorDia += livros[j].valor * taxaMulta;
+                break;
+            }
+        }
+    }
+    numEmprestimos++;
+    printf("\n\tEmprestimo cadastrado com sucesso!\n");
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+void modificarMulta() {
+    system("cls");
+    printf("\n\tDigite a nova taxa de multa por dia (formato decimal, ex: 0.20 para 20%%): ");
+    scanf("%f", &taxaMulta);
+    printf("\n\tTaxa de multa modificada para %.2f%%\n", taxaMulta * 100);
+    printf("\n\tPressione ENTER para continuar.\n");
+    getchar();
+    getchar();
+}
+
+int main() {
     int opcao;
+    do {
+        system("cls");
+        printf("\n\t\tSistema de Biblioteca\n\n\n");
+        printf("\t\t1 - Cadastrar novo usuario\n");
+        printf("\t\t2 - Cadastrar novo livro\n");
+        printf("\t\t3 - Cadastrar novo emprestimo\n");
+        printf("\t\t4 - Modificar taxa de multa por dia\n");
+        printf("\t\t5 - Visualizar todos os livros\n");
+        printf("\t\t6 - Visualizar todos os usuarios\n");
+        printf("\t\t7 - Editar livro\n");
+        printf("\t\t8 - Editar usuario\n");
+        printf("\t\t9 - Deletar livro\n");
+        printf("\t\t10 - Deletar usuario\n");
+        printf("\t\t11 - Visualizar emprestimos\n");
+        printf("\t\t12 - Sair\n");
+        printf("\t\t");
+        scanf("%d", &opcao);
 
-    do{
-       printf("\n\t\t\t     Sistema de biblioteca\n\n");
-       printf("\n\t\t     1 - Cadastrar Alunos\n");
-       printf("\t\t     2 - Cadastrar Livros\n");
-       printf("\t\t     3 - Emprestimos de Livros\n");
-       printf("\t\t     4 - Devolucao de Livros\n");
-       printf("\t\t     5 - Consultar alunos cadastrados\n");
-       printf("\t\t     6 - Consultar livros cadastrados\n");
-       printf("\t\t     0 - Sair do programa\n");
-       printf("\nOpcao desejada: ");
-       scanf("%d", &opcao);
-
-        switch ( opcao ){
+        switch (opcao) {
             case 1:
-                cadastroUsuario(); break;
+                cadastrarUsuario();
+                break;
             case 2:
-                cadastroLivro(); break;
+                cadastrarLivro();
+                break;
             case 3:
-                emprestimos(); break;
+                cadastrarEmprestimo();
+                break;
             case 4:
-                devolucao(); break;
+                modificarMulta();
+                break;
             case 5:
-                consultaUsuario(); break;
+                visualizarLivros();
+                break;
             case 6:
-                consultaLivro(); break;
+                visualizarUsuarios();
+                break;
             case 7:
-                lerArquivo(); break;
-            case 0:
+                editarLivro();
+                break;
+            case 8:
+                editarUsuario();
+                break;
+            case 9:
+                deletarLivro();
+                break;
+            case 10:
+                deletarUsuario();
+                break;
+            case 11:
+                visualizarEmprestimos();
+                break;
+            case 12:
+                printf("\n\tSaindo do sistema...\n");
                 break;
             default:
-                printf("\n\t\t\tOpcao invalida!\n\n");
+                printf("\n\tOpcao invalida!\n");
         }
-       }while( opcao != 0 );
-    system("pause");
+    } while (opcao != 12);
+
     return 0;
 }
-
-// função pra cadastro de usuarios
-void cadastroUsuario(){
-    FILE * arquivo;
-    usuario dadosUsuario;
-    int auxNome;
-    char cadastroUsuario;
-    dadosUsuario.emprestimo = 0;
-
-    printf("\n\t\t\tCadastro de Usuarios\n\n");
-
-    // verificar dados
-    if((arquivo = fopen("usuarios.dat", "ab"))== NULL){
-        printf("\nErro de abertura do arquivo usuarios.dat!");
-        return 0;
-    }
-    fseek(arquivo,0,SEEK_END);
-    auxNome= ftell(arquivo) / sizeof(usuario);
-
-    do{
-        dadosUsuario.emprestimo = 0;
-        printf("\nNome: ");
-        scanf("%59[^\n]", dadosUsuario.nome);
-        printf("Emprestimos.: %d\n", dadosUsuario.emprestimo);
-        fwrite(&dadosUsuario,sizeof(usuario),1,arquivo);
-
-        do{
-            printf("\nCadastrar outro usuario? (S/N): ");
-            scanf(" %c", &cadastroUsuario);
-            cadastroUsuario = toupper(cadastroUsuario);
-        } while(cadastroUsuario != 'S' && cadastroUsuario != 'N');
-        } while(cadastroUsuario == 'S');
-
-    fclose(arquivo);
-    system("cls");
-}
-
-// função pra cadastrar livros
-void cadastroLivro(){
-    FILE * arquivo;
-    livro dadosLivro;
-    char cadastroLivro;
-
-    // verificar dados
-    if((arquivo = fopen("livros.dat", "ab")) == NULL){
-        printf("\nErro na abertura do arquivo livros.dat!\n\n");
-        return 0;
-    }
-
-    printf("\n\t\t\tCadastrar Livros\n\n");
-
-    do{
-        printf("\nISBN: ");
-        scanf(" %16[^\n]", dadosLivro.isbn);
-        printf("Titulo: ");
-        scanf(" %129[^\n]", dadosLivro.titulo);
-        printf("Autor: ");
-        scanf(" %179[^\n]", dadosLivro.autor);
-        printf("Disponiveis: %d\n", dadosLivro.disponivel);
-        fwrite(&dadosLivro,sizeof(livro),1,arquivo);
-
-        do{
-            printf("\nDeseja cadastrar outro livro?(S/N): ");
-            scanf("%c", &cadastroLivro);
-            cadastroLivro = toupper(cadastroLivro);
-        } while(cadastroLivro != 'S' && cadastroLivro != 'N');
-    } while(cadastroLivro == 'S');
-
-    fclose(arquivo);
-    system("cls");
-}
-
-// função emprestimos
-void Emprestimos(){
-    FILE * fp, * fpa, * fpl, * fpr;
-    emprestimo dadosEmprestimo;
-    emprestimo auxisbn;
-    emprestimo guard_valor;
-    usuario dadosUsuario;
-    livro dadosLivro;
-    aux dataAux;
-    data controle;
-    int cont = 1, auxEmp = 0, auxDia, auxMes, auxAno, contseq=0;
-    char op, auxis[20], auxisb[20];
-
-    if((fp = fopen ("emprestimo.dat", "ab")) == NULL){
-        printf("\n\nErro na abertura do arquivo emprestimo.dat!\n\n");
-        return 0;
-    }
-    if((fpl = fopen ("livro.dat", "r+b")) == NULL){
-        printf("\nErro na leitura do arquivo livro.dat");
-        return;
-    }
-    if((fpa = fopen ("usuario.dat", "r+b")) == NULL){
-        printf("\nErro na leitura do arquivo usuario.dat!\n\n");
-        return;
-    }
-    if((fpr = fopen ("emprestimo.dat", "rb")) == NULL){
-        printf("\n\nErro na abertura do arquivo emprestimo.dat!\n\n");
-        return;
-    }
-    printf("\n\n\n\t\t\tEmprestimos de Livros\n\n");
-    printf("\nIsbn: ");
-    scanf(" %16[^\n]", auxisbn.isbn);
-    strcpy(auxisb,auxis);
-
-    // verifica se o isbn é válido e exibe as informações
-    while(1){
-        fread(&dadosLivro, sizeof(livro),1,fpl);
-
-        if(feof(fpl)){
-        printf("\nNao ha livro com o este ISBN no acervo da biblioteca!\n\n");
-        return 0;
-        }
-        if(strcasecmp (auxisbn.isbn,dadosLivro.isbn) == 0){
-        printf("Titulo: %s\n", dadosLivro.titulo);
-        printf("Disponiveis: %d\n", dadosLivro.disponivel);
-        guard_valor = auxisbn;
-        break;
-        }
-    }
-       printf("\Nome: ");
-       scanf("%s", &dadosEmprestimo.nome);
-       auxEmp = dadosEmprestimo.nome;
-
-    // verifica se o nome é válido e exibe as informações
-    while(1){
-        fread(&dadosUsuario, sizeof(usuario),1,fpa);
-        if(feof(fpa)){
-        printf("\nO nome %c nao esta cadastrado!\n\n", dadosEmprestimo.nome);
-        return;
-        }
-        if(dadosEmprestimo.nome == dadosUsuario.nome){
-            printf("Nome: %s\n", dadosUsuario.nome);
-            printf("Livros emprestados: %d\n", dadosUsuario.emprestimo);
-            break;
-        }
-    }
-    dataAux.dte = dataAtual(controle);
-    dataAux.dte.mes += 1;
-
-    if(dadosUsuario.emprestimo < 3){ // verifica se o usuario possui mais de três emprestimos
-
-    fseek(fpr,0,SEEK_CUR); // verifica se o usuario possui pendências de entrega
-
-    while(1){
-            fread(&dadosEmprestimo,sizeof(emprestimo),1,fpr);
-            if(feof(fpr)){
-                break;
-            }
-            if(dadosEmprestimo.nome == auxNome){
-                if(dadosEmprestimo.prevista.ano <= dataAux.dte.ano){
-                    if(dadosEmprestimo.prevista.mes <= dataAux.dte.mes){
-                        if(dadosEmprestimo.prevista.dia <= dataAux.dte.dia && dadosEmprestimo.devolucao.dia == 0){
-                            printf("\n\t\t\tEntrega pendente!\n\n");
-                            return 0;
-                        }
-                    }
-                }
-                if(dadosEmprestimo.prevista.mes < dataAux.dte.mes && dadosEmprestimo.devolucao.mes == 00){
-                        printf("\n\t\t\tEntrega pendente!\n\n");
-                        return 0;
-                }
-                if(dadosEmprestimo.prevista.ano < dataAux.dte.ano && dadosEmprestimo.devolucao.ano == 0000){
-                        printf("\n\t\t\tEntrega pendente!\n\n");
-                        return 0;
-                }
-            }
-    }
-    // tratamento das datas
-    dataAux.dtp = dataAtual(controle);
-    dataAux.dtp.dia += 10;
-    dataAux.dtp.mes += 1;
-
-    while( cont <= 12 ){
-            if(dataAux.dtp.mes <= 7){
-                if(cont == 2 && dataAux.dtp.dia > 28 && dataAux.dtp.mes == 2){
-                dataAux.dtp.dia -= 28; dataAux.dtp.mes += 1; break;
-            } else{
-                if(cont % 2 == 1 && dataAux.dtp.dia > 31 && dataAux.dtp.mes == cont){
-                dataAux.dtp.dia -= 31; dataAux.dtp.mes += 1; break;
-              } else{
-                  if(cont % 2 == 0 && dataAux.dtp.dia > 30 && dataAux.dtp.mes == cont){
-                  dataAux.dtp.dia -= 30; dataAux.dtp.mes += 1; break;
-                  }
-                }
-              }
-            } else{
-                if(dataAux.dtp.dia > 31 && dataAux.dte.mes == 12){
-                dataAux.dtp.dia -= 31; dataAux.dtp.ano += 1;
-                dataAux.dtp.mes = 1; break;
-              } else{
-                if(cont % 2 == 0 && dataAux.dtp.dia > 31 && dataAux.dtp.mes == cont){
-                dataAux.dtp.dia -= 31; dataAux.dtp.mes += 1; break;
-                } else{
-                    if(cont % 2 == 1 && dataAux.dtp.dia > 30 && dataAux.dtp.mes == cont){
-                    dataAux.dtp.dia -= 30; dataAux.dtp.mes += 1; break;
-                    }
-                  }
-                }
-              }
-     cont++;
-   }
-    if(dadosLivro.disponivel >= 1){ // verifica se ha livros disponíveis
-
-    // efetua a escrita no arquivo emprestimo.dat
-    while(1){
-            dadosEmprestimo = auxisbn;
-            printf("\nIsbn: %s\n", dadosEmprestimo.isbn);
-
-            dadosEmprestimo.devolucao.dia = dadosEmprestimo.devolucao.mes = dadosEmprestimo.devolucao.ano = 0;
-            dadosEmprestimo.emprestimo.dia = dataAux.dte.dia; dadosEmprestimo.emprestimo.mes = dataAux.dte.mes;
-            dadosEmprestimo.emprestimo.ano = dataAux.dte.ano;
-            dadosEmprestimo.prevista.dia = dataAux.dtp.dia; dadosEmprestimo.prevista.mes = dataAux.dtp.mes;
-            dadosEmprestimo.prevista.ano = dataAux.dtp.ano;
-
-            DadosEmprestimo.nome = auxmatricula;
-
-            printf("Matricula...................: %08d\n", DadosEmprestimo.matricula);
-            printf("Data do emprestimo..........: ");
-            printf("%02d %02d %d\n", DadosEmprestimo.emprestimo.dia, DadosEmprestimo.emprestimo.mes, DadosEmprestimo.emprestimo.ano);
-            printf("Data prevista para devolucao: ");
-            printf("%02d %02d %d\n", DadosEmprestimo.prevista.dia, DadosEmprestimo.prevista.mes, DadosEmprestimo.prevista.ano);
-            printf("Data da efetiva devolucao...: ");
-            printf("%02d %02d %04d\n\n", DadosEmprestimo.devolucao.dia, DadosEmprestimo.devolucao.mes, DadosEmprestimo.devolucao.ano);
-            fwrite(&DadosEmprestimo,sizeof(emprestimo),1,fp);
-            break;
-    }
-        rewind(fpa);
-        while(1){
-        fread(&DadosAluno,sizeof(aluno),1,fpa);
-        if(feof(fpa)){
-        printf("\nError");
-        break;
-        }
-        if(DadosAluno.matricula == DadosEmprestimo.matricula){
-        DadosAluno.emprestimos += 1;
-        fseek(fpa, -sizeof(aluno),SEEK_CUR);
-        fwrite(&DadosAluno,sizeof(aluno),1,fpa);
-        printf("\t\t\tTotal Emprestimos Aluno.: %d\n", DadosAluno.emprestimos);
-        break;
-        }
-     }
-        rewind(fpl);
-        while(1){
-        fread(&DadosLivro,sizeof(livro),1,fpl);
-        if(feof(fpl)){
-        printf("\nError");
-        break;
-        }
-        if(strcasecmp (DadosEmprestimo.isbn,DadosLivro.isbn) == 0){
-        DadosLivro.disponiveis -= 1;
-        fseek(fpl, -sizeof(livro),SEEK_CUR);
-        fwrite(&DadosLivro,sizeof(livro),1,fpl);
-        printf("\t\t\tTotal Livros Disponiveis: %d\n", DadosLivro.disponiveis);
-        break;
-        }
-     }
- }
- else{
-      printf("\n\n\t\t\tNao ha livros disponiveis\n");
-
-      /*Calcula e devolve a data da entrega mais próxima*/
-
-        rewind(fpr);
-        while(1){
-        fread(&DadosEmprestimo,sizeof(emprestimo),1,fpr);
-        if(feof(fpr)){
-        fclose(fpr);
-        break;
-        }
-        if(strcasecmp (guard_valor.isbn,DadosEmprestimo.isbn) == 0){
-        if(contseq == 0){
-        Auxano = DadosEmprestimo.prevista.ano;
-        Auxmes = DadosEmprestimo.prevista.mes;
-        Auxdia = DadosEmprestimo.prevista.dia;
-        }
-        if( DadosEmprestimo.devolucao.dia == 00 ){
-        if(Auxano >= DadosEmprestimo.prevista.ano){
-                  if(Auxmes >= DadosEmprestimo.prevista.mes){
-                            if(Auxdia >= DadosEmprestimo.prevista.dia){
-                            Auxano = DadosEmprestimo.prevista.ano;
-                            Auxmes = DadosEmprestimo.prevista.mes;
-                            Auxdia <= DadosEmprestimo.prevista.dia;
-                            }
-                         }
-                      }
-                   }
-        }
-        cont++;
-     }
-     printf("\n\n\t\tData da entrega mais proxima: %02d %02d %d\n", Auxdia, Auxmes, Auxano);
-     }
- }
-      else{
-      printf("\n\t\t\tCota de livros atingida\n\n");
-      return;
-      }
-
-    fclose(fp);
-    fclose(fpl);
-    fclose(fpa);
-}
-
-
-
