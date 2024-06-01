@@ -149,7 +149,7 @@ void visualizarUsuarios() {
     }
     printf("\n\tUsuarios cadastrados:\n");
     for (int i = 0; i < numUsuarios; i++) {
-        printf("%d. CPF: %s, Nome: %s, Idade: %d\n", i + 1, usuarios[i].cpf, usuarios[i].nome, usuarios[i].idade);
+        printf("\n\t%d. CPF: %s, Nome: %s, Idade: %d\n", i + 1, usuarios[i].cpf, usuarios[i].nome, usuarios[i].idade);
     }
     printf("\n\tPressione ENTER para continuar.\n");
     getchar();
