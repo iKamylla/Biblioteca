@@ -33,33 +33,38 @@ Emprestimo emprestimos[MAX_EMPRESTIMOS];
 int numLivros = 0, numUsuarios = 0, numEmprestimos = 0;
 float taxaMulta = 0.10;
 
-void cadastrarLivro() {
+// Cadastrar livros
+void cadastrarLivros(){
     system("cls");
     printf("\n\tCadastrar Livros\n");
+
     if (numLivros >= MAX_LIVROS) {
         printf("\n\tLimite de livros atingido!\n");
         return;
     }
     printf("\n\tISBN do livro: ");
     scanf("%d", &livros[numLivros].ISBN);
-    printf("\n\tNome do livro: ");
+    printf("\n\tTitulo: ");
     scanf(" %[^\n]", livros[numLivros].nome);
-    printf("\n\tAutor do livro: ");
+    printf("\n\tAutor: ");
     scanf(" %[^\n]", livros[numLivros].autor);
-    printf("\n\tValor do livro: ");
+    printf("\n\tValor: ");
     scanf("%f", &livros[numLivros].valor);
     numLivros++;
     printf("\n\tLivro cadastrado!\n");
     printf("\n\tENTER para continuar.\n");
     getchar(); getchar();
 }
-
-void editarLivro() {
+ // Editar livros
+void editarLivros(){
     system("cls");
-    int isbn, found = 0;
     printf("\n\tEditar Livros\n");
+
+    int isbn, found = 0;
+
     printf("\n\tISBN do livro que deseja editar: ");
     scanf("%d", &isbn);
+
     for (int i = 0; i < numLivros; i++) {
         if (livros[i].ISBN == isbn) {
             printf("\n\tEditando livro %s:\n", livros[i].nome);
@@ -83,15 +88,19 @@ void editarLivro() {
     getchar(); getchar();
 }
 
-void deletarLivro() {
+// Deletar livros
+void deletarLivros(){
     system("cls");
-    int isbn, found = 0;
     printf("\n\tDeletar Livros\n");
+
+    int isbn, found = 0;
+
     printf("\n\tISBN do livro que deseja deletar: ");
     scanf("%d", &isbn);
-    for (int i = 0; i < numLivros; i++) {
-        if (livros[i].ISBN == isbn) {
-            for (int j = i; j < numLivros - 1; j++) {
+
+    for(int i = 0; i < numLivros; i++){
+        if(livros[i].ISBN == isbn) {
+            for(int j = i; j < numLivros - 1; j++){
                 livros[j] = livros[j + 1];
             }
             numLivros--;
@@ -100,45 +109,50 @@ void deletarLivro() {
             break;
         }
     }
-    if (!found) {
+    if(!found){
         printf("\n\tISBN nao encontrado!\n");
     }
     printf("\n\tENTER para continuar.\n");
     getchar(); getchar();
 }
 
-void livrosCrescente(Livro *livros, int numLivros, int opcao) {
-    for (int i = 0; i < numLivros - 1; i++) {
-        for (int j = 0; j < numLivros - 1 - i; j++) {
-            int troca = 0;
-            switch (opcao) {
+// Ordenar livros de forma crescente
+void livrosCrescente(Livro *livros, int numLivros, int opcao){ 
+    for(int i = 0; i < numLivros - 1; i++){ 
+        for(int j = 0; j < numLivros - 1 - i; j++){ 
+            int troca = 0; 
+
+            switch(opcao){ 
+
                 case 1: // ISBN
-                    if (livros[j].ISBN > livros[j + 1].ISBN) troca = 1;
+                    if(livros[j].ISBN > livros[j + 1].ISBN) troca = 1;
                     break;
-                case 2: // Nome
-                    if (strcmp(livros[j].nome, livros[j + 1].nome) > 0) troca = 1;
+                case 2: // Nome 
+                    if(strcmp(livros[j].nome, livros[j + 1].nome) > 0) troca = 1;
                     break;
                 case 3: // Autor
-                    if (strcmp(livros[j].autor, livros[j + 1].autor) > 0) troca = 1;
+                    if(strcmp(livros[j].autor, livros[j + 1].autor) > 0) troca = 1;
                     break;
                 case 4: // Valor
-                    if (livros[j].valor > livros[j + 1].valor) troca = 1;
+                    if(livros[j].valor > livros[j + 1].valor) troca = 1;
                     break;
             }
-            if (troca) {
-                Livro temp = livros[j];
-                livros[j] = livros[j + 1];
-                livros[j + 1] = temp;
+            if(troca){ 
+                Livro temp = livros[j]; 
+                livros[j] = livros[j + 1]; 
+                livros[j + 1] = temp; 
             }
         }
     }
 }
 
-void livrosDecrescente(Livro *livros, int numLivros, int opcao) {
+// Ordenar livros de forma decrescente
+void livrosDecrescente(Livro *livros, int numLivros, int opcao){
     for (int i = 0; i < numLivros - 1; i++) {
         for (int j = 0; j < numLivros - 1 - i; j++) {
             int troca = 0;
-            switch (opcao) {
+
+            switch(opcao){
                 case 1: // ISBN
                     if (livros[j].ISBN < livros[j + 1].ISBN) troca = 1;
                     break;
@@ -152,7 +166,7 @@ void livrosDecrescente(Livro *livros, int numLivros, int opcao) {
                     if (livros[j].valor < livros[j + 1].valor) troca = 1;
                     break;
             }
-            if (troca) {
+            if(troca){
                 Livro temp = livros[j];
                 livros[j] = livros[j + 1];
                 livros[j + 1] = temp;
@@ -161,65 +175,56 @@ void livrosDecrescente(Livro *livros, int numLivros, int opcao) {
     }
 }
 
-void visualizarLivrosOrdenados(int ordem, int criterio) {
-    printf("\n\tVisualizar Livros\n");
-    if (numLivros == 0) {
-        printf("\n\tNenhum livro cadastrado!\n");
-        printf("\n\tENTER para continuar.\n");
-        getchar(); getchar();
-        return;
-    }
-    if (ordem == 1)
-        livrosCrescente(livros, numLivros, criterio);
-    else
-        livrosDecrescente(livros, numLivros, criterio);
-
-    printf("\n\tLivros ordenados:\n");
-    for (int i = 0; i < numLivros; i++) {
-        printf("\tISBN: %d, Nome: %s, Autor: %s, Valor: %.2f\n", livros[i].ISBN, livros[i].nome, livros[i].autor, livros[i].valor);
-    }
-    printf("\n\tENTER para continuar.\n");
-    getchar(); getchar();
-}
-
-
-void visualizarLivros() {
+// Visualizar livros
+void visualizarLivros(){
     system("cls");
     printf("\n\tVisualizar Livros\n");
+
     if (numLivros == 0) {
-        printf("\n\tNenhum livro cadastrado!\n");
+        printf("\n\tNao ha livro cadastrado!\n");
         return;
     }
-    int opcao, ordem;
-    printf("\n\tEscolha uma opcao de ordenacao:\n\n");
-    printf("\t1 - ISBN\n");
-    printf("\t2 - Nome\n");
-    printf("\t3 - Autor\n");
-    printf("\t4 - Valor\n");
+    int opcao, ordem, found = 0;
+
+    printf("\n\tEscolha uma opcao:\n");
+    printf("\n\t1 - ISBN\n\t2 - Titulo\n\t3 - Autor\n\t4 - Valor\n");
     printf("\n\tOpcao desejada: ");
     scanf("%d", &opcao);
 
-    printf("\n\tEscolha a ordem de ordenacao:\n\n");
-    printf("\t1 - Crescente\n");
-    printf("\t2 - Decrescente\n");
+    printf("\n\tEscolha a ordem:\n");
+    printf("\n\t1 - Crescente\n\t2 - Decrescente\n");
     printf("\n\tOpcao desejada: ");
     scanf("%d", &ordem);
 
-    visualizarLivrosOrdenados(ordem, opcao);
+    if(ordem == 1){
+       livrosCrescente(livros, numLivros, opcao);
+    }
+    else{
+        livrosDecrescente(livros, numLivros, opcao);
+    }
+    system("cls");
+    printf("\n\tLivros ordenados:\n");
+    for(int i = 0; i < numLivros; i++){
+        printf("\n\tISBN: %d, Titulo: %s, Autor: %s, Valor: %.2f", livros[i].ISBN, livros[i].nome, livros[i].autor, livros[i].valor);
+    }
+    printf("\n\n\tENTER para continuar.");
+    getchar(); getchar();
 }
 
-void cadastrarUsuario() {
+// Cadastrar usuários
+void cadastrarUsuarios(){
     system("cls");
-    printf("\n\tCadastrar Usuario\n");
-    if (numUsuarios >= MAX_USUARIOS) {
+    printf("\n\tCadastrar Usuarios\n");
+
+    if(numUsuarios >= MAX_USUARIOS) {
         printf("\n\tLimite de usuarios atingido!\n");
         return;
     }
-    printf("\n\tCPF do usuario (11 caracteres): ");
+    printf("\n\tCPF (11 caracteres): ");
     scanf("%s", usuarios[numUsuarios].cpf);
-    printf("\n\tNome do usuario: ");
+    printf("\n\tNome: ");
     scanf("%s", usuarios[numUsuarios].nome);
-    printf("\n\tIdade do usuario: ");
+    printf("\n\tIdade: ");
     scanf("%d", &usuarios[numUsuarios].idade);
     numUsuarios++;
     printf("\n\tUsuario cadastrado!\n");
@@ -227,29 +232,18 @@ void cadastrarUsuario() {
     getchar(); getchar();
 }
 
-void visualizarUsuarios() {
+// Editar usuários
+void editarUsuarios(){
     system("cls");
-    printf("\n\tVisualizar Usuario\n");
-    if (numUsuarios == 0) {
-        printf("\n\tNenhum usuario cadastrado!\n");
-        return;
-    }
-    printf("\n\tUsuarios cadastrados:\n");
-    for (int i = 0; i < numUsuarios; i++) {
-        printf("\n\t%d. CPF: %s, Nome: %s, Idade: %d\n", i + 1, usuarios[i].cpf, usuarios[i].nome, usuarios[i].idade);
-    }
-    printf("\n\tENTER para continuar.\n");
-    getchar(); getchar();
-}
+    printf("\n\tEditar Usuarios\n");
 
-void editarUsuario() {
-    system("cls");
     char cpf[12];
     int found = 0;
-    printf("\n\tEditar Usuario\n");
+
     printf("n\tCPF do usuario que deseja editar: ");
     scanf("%s", cpf);
-    for (int i = 0; i < numUsuarios; i++) {
+
+    for(int i = 0; i < numUsuarios; i++){
         if (strcmp(usuarios[i].cpf, cpf) == 0) {
             printf("\n\tEditando usuario %s:\n", usuarios[i].nome);
             printf("\n\ts", usuarios[i].cpf);
@@ -262,20 +256,24 @@ void editarUsuario() {
             break;
         }
     }
-    if (!found) {
+    if(!found){
         printf("\n\tCPF nao encontrado!\n");
     }
     printf("\n\tENTER para continuar.\n");
     getchar(); getchar();
 }
 
-void deletarUsuario() {
+// Deletar usuários
+void deletarUsuarios(){
     system("cls");
+    printf("\n\tDeletar Usuarios\n");
+
     char cpf[12];
     int found = 0;
-    printf("\n\tDeletar Usuario\n");
+
     printf("\n\tCPF do usuario que deseja deletar: ");
     scanf("%s", cpf);
+
     for (int i = 0; i < numUsuarios; i++) {
         if (strcmp(usuarios[i].cpf, cpf) == 0) {
             for (int j = i; j < numUsuarios - 1; j++) {
@@ -294,19 +292,80 @@ void deletarUsuario() {
     getchar(); getchar();
 }
 
-void visualizarEmprestimos() {
+// Visualizar usuários
+void visualizarUsuarios() {
+    system("cls");
+    printf("\n\tVisualizar Usuarios\n");
+    if (numUsuarios == 0) {
+        printf("\n\tNenhum usuario cadastrado!\n");
+        return;
+    }
+    printf("\n\tUsuarios cadastrados:\n");
+    for (int i = 0; i < numUsuarios; i++) {
+        printf("\n\t%d. CPF: %s, Nome: %s, Idade: %d\n", i + 1, usuarios[i].cpf, usuarios[i].nome, usuarios[i].idade);
+    }
+    printf("\n\tENTER para continuar.\n");
+    getchar(); getchar();
+}
+
+// Cadastrar empréstimos
+void cadastrarEmprestimos(){
+    system("cls");
+    printf("\n\tCadastrar Emprestimo\n");
+
+    if(numEmprestimos >= MAX_EMPRESTIMOS){
+        printf("\n\tLimite de emprestimos atingido!\n");
+        return;
+    }
+    int numLivrosEmprestimo;
+
+    printf("\n\tNumero de livros do emprestimo: ");
+    scanf("%d", &numLivrosEmprestimo);
+
+    for(int i = 0; i < numLivrosEmprestimo; i++){
+        printf("\n\tISBN do livro: ", i + 1);
+        scanf("%d", &emprestimos[numEmprestimos].ISBNs[i]);
+    }
+    int diasEmprestimo;
+    emprestimos[numEmprestimos].dataEmprestimo = time(NULL);
+    printf("\n\tNumero de dias de emprestimo: ");
+    scanf("%d", &diasEmprestimo);
+    emprestimos[numEmprestimos].dataDevolucao = emprestimos[numEmprestimos].dataEmprestimo + (diasEmprestimo * 86400);
+
+    // Calculando a multa por dia
+    emprestimos[numEmprestimos].multaPorDia = 0;
+    for(int i = 0; i < numLivrosEmprestimo; i++){
+        for(int j = 0; j < numLivros; j++) {
+            if(emprestimos[numEmprestimos].ISBNs[i] == livros[j].ISBN) {
+                emprestimos[numEmprestimos].multaPorDia += livros[j].valor * taxaMulta;
+                break;
+            }
+        }
+    }
+    numEmprestimos++;
+    printf("\n\tEmprestimo feito!\n");
+    printf("\n\tENTER para continuar.\n");
+    getchar(); getchar();
+}
+
+// Visualizr empréstimos
+void visualizarEmprestimos(){
     system("cls");
     printf("\n\tVisualizar Emprestimo\n");
-    if (numEmprestimos == 0) {
+
+    if(numEmprestimos == 0){
         printf("\n\tNenhum emprestimo cadastrado!\n");
         return;
     }
     printf("\n\tEmprestimos cadastrados:\n");
+
     char buf[20];
-    for (int i = 0; i < numEmprestimos; i++) {
+
+    for(int i = 0; i < numEmprestimos; i++){
         printf("\n\tEmprestimo %d:\n", i + 1);
         printf("\n\tLivros emprestados: ");
-        for (int j = 0; j < 10 && emprestimos[i].ISBNs[j] != 0; j++) {
+
+        for(int j = 0; j < 10 && emprestimos[i].ISBNs[j] != 0; j++){
             printf("%d ", emprestimos[i].ISBNs[j]);
         }
         printf("\n");
@@ -320,75 +379,44 @@ void visualizarEmprestimos() {
     getchar(); getchar();
 }
 
-void cadastrarEmprestimo() {
-    system("cls");
-    printf("\n\tCadastrar Emprestimo\n");
-    if (numEmprestimos >= MAX_EMPRESTIMOS) {
-        printf("\n\tLimite de emprestimos atingido!\n");
-        return;
-    }
-    printf("\n\tNumero de livros do emprestimo: ");
-    int numLivrosEmprestimo;
-    scanf("%d", &numLivrosEmprestimo);
-    for (int i = 0; i < numLivrosEmprestimo; i++) {
-        printf("\n\tISBN do livro %d: ", i + 1);
-        scanf("%d", &emprestimos[numEmprestimos].ISBNs[i]);
-    }
-    emprestimos[numEmprestimos].dataEmprestimo = time(NULL);
-    printf("\n\tNumero de dias de emprestimo: ");
-    int diasEmprestimo;
-    scanf("%d", &diasEmprestimo);
-    emprestimos[numEmprestimos].dataDevolucao = emprestimos[numEmprestimos].dataEmprestimo + (diasEmprestimo * 86400);
-
-    // Calculando a multa por dia
-    emprestimos[numEmprestimos].multaPorDia = 0;
-    for (int i = 0; i < numLivrosEmprestimo; i++) {
-        for (int j = 0; j < numLivros; j++) {
-            if (emprestimos[numEmprestimos].ISBNs[i] == livros[j].ISBN) {
-                emprestimos[numEmprestimos].multaPorDia += livros[j].valor * taxaMulta;
-                break;
-            }
-        }
-    }
-    numEmprestimos++;
-    printf("\n\tEmprestimo feito!\n");
-    printf("\n\tENTER para continuar.\n");
-    getchar(); getchar();
-}
-
-void modificarMulta() {
+// Modificar multa
+void modificarMulta(){
     system("cls");
     printf("\n\tModificar Multa\n");
+
     printf("\n\tNova taxa de multa por dia (formato decimal, ex: 0.20 para 20%%): ");
     scanf("%f", &taxaMulta);
     printf("\n\tTaxa de multa modificada para %.2f%%\n", taxaMulta * 100);
+
     printf("\n\tENTER para continuar.\n");
     getchar(); getchar();
 }
 
-int main() {
+// Menu
+int main(){
     int opcao;
-    do {
+
+    do{
         system("cls");
         printf("\n\t======================||Biblioteca||======================\n\n\t\t\t\t   MENU\n\n");
-        printf("\t1 - Cadastrar usuario\t\t4 - Visualizar usuarios\n");
-        printf("\t2 - Cadastrar livro\t\t5 - Visualizar livros\n");
-        printf("\t3 - Cadastrar emprestimo\t6 - Visualizar emprestimos\n\n");
-        printf("\t7 - Editar livro\t\t9 - Deletar livro\n");
-        printf("\t8 - Editar usuario\t\t10 - Deletar usuario\n\n");
+        printf("\t1 - Cadastrar usuarios\t\t4 - Visualizar usuarios\n");
+        printf("\t2 - Cadastrar livros\t\t5 - Visualizar livros\n");
+        printf("\t3 - Cadastrar emprestimos\t6 - Visualizar emprestimos\n\n");
+        printf("\t7 - Editar livros\t\t9 - Deletar livros\n");
+        printf("\t8 - Editar usuarios\t\t10 - Deletar usuarios\n\n");
         printf("\t11 - Modificar multa\t\t12 - Sair\n\n");
         printf("\tOpcao desejada: ");
         scanf("%d", &opcao);
 
-        switch (opcao) {
+        switch(opcao){
             case 1:
-                cadastrarUsuario();
+                cadastrarUsuarios();
                 break;
             case 2:
-                cadastrarLivro();
+                cadastrarLivros();
                 break;
             case 3:
-                cadastrarEmprestimo();
+                cadastrarEmprestimos();
                 break;
             case 4:
                 visualizarUsuarios();
@@ -400,16 +428,16 @@ int main() {
                 visualizarEmprestimos();
                 break;
             case 7:
-                editarLivro();
+                editarLivros();
                 break;
             case 8:
-                editarUsuario();
+                editarUsuarios();
                 break;
             case 9:
-                deletarLivro();
+                deletarLivros();
                 break;
             case 10:
-                deletarUsuario();
+                deletarUsuarios();
                 break;
             case 11:
                 modificarMulta();
@@ -420,6 +448,6 @@ int main() {
             default:
                 printf("\n\tOpcao invalida!\n");
         }
-    } while (opcao != 12);
+    } while(opcao != 12);
     return 0;
 }
