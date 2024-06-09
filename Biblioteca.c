@@ -123,7 +123,6 @@ void livrosCrescente(Livro *livros, int numLivros, int opcao){
             int troca = 0; 
 
             switch(opcao){ 
-
                 case 1: // ISBN
                     if(livros[j].ISBN > livros[j + 1].ISBN) troca = 1;
                     break;
