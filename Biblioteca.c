@@ -136,6 +136,7 @@ void livrosCrescente(Livro *livros, int numLivros, int opcao){
                     if(livros[j].valor > livros[j + 1].valor) troca = 1;
                     break;
             }
+            // Troca de posições
             if(troca){ 
                 Livro temp = livros[j]; 
                 livros[j] = livros[j + 1]; 
@@ -165,6 +166,7 @@ void livrosDecrescente(Livro *livros, int numLivros, int opcao){
                     if (livros[j].valor < livros[j + 1].valor) troca = 1;
                     break;
             }
+            // Troca de posições
             if(troca){
                 Livro temp = livros[j];
                 livros[j] = livros[j + 1];
@@ -203,6 +205,8 @@ void visualizarLivros(){
     }
     system("cls");
     printf("\n\tLivros ordenados:\n");
+    
+    // Exibir os livros ordenados de acordo com o critério
     for(int i = 0; i < numLivros; i++){
         printf("\n\tISBN: %d, Titulo: %s, Autor: %s, Valor: %.2f", livros[i].ISBN, livros[i].nome, livros[i].autor, livros[i].valor);
     }
