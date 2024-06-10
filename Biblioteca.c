@@ -120,7 +120,7 @@ void deletarLivros(){
 void livrosCrescente(Livro *livros, int numLivros, int opcao){ 
     for(int i = 0; i < numLivros - 1; i++){ 
         for(int j = 0; j < numLivros - 1 - i; j++){ 
-            int troca = 0; 
+            int troca = 0; // Indica se uma troca é necessária
 
             switch(opcao){ 
                 case 1: // ISBN
@@ -136,7 +136,7 @@ void livrosCrescente(Livro *livros, int numLivros, int opcao){
                     if(livros[j].valor > livros[j + 1].valor) troca = 1;
                     break;
             }
-            // Troca de posições
+            // Se troca for necessária, trocar os elementos adjacentes
             if(troca){ 
                 Livro temp = livros[j]; 
                 livros[j] = livros[j + 1]; 
@@ -150,7 +150,7 @@ void livrosCrescente(Livro *livros, int numLivros, int opcao){
 void livrosDecrescente(Livro *livros, int numLivros, int opcao){
     for (int i = 0; i < numLivros - 1; i++) {
         for (int j = 0; j < numLivros - 1 - i; j++) {
-            int troca = 0;
+            int troca = 0; // Indica se umatroca é necessária
 
             switch(opcao){
                 case 1: // ISBN
@@ -166,7 +166,7 @@ void livrosDecrescente(Livro *livros, int numLivros, int opcao){
                     if (livros[j].valor < livros[j + 1].valor) troca = 1;
                     break;
             }
-            // Troca de posições
+            // Se troca for necessária, fazer a troca dos elementos adjacentes
             if(troca){
                 Livro temp = livros[j];
                 livros[j] = livros[j + 1];
